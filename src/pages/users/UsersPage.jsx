@@ -3,6 +3,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { Typography, Button, Box, TextField } from '@mui/material';
 import { useUsersContext } from '../../context/usersContext';
 import UserRow from '../users/userRow/UserRow';
+import VirtualList from '../../components/VitualList';
 
 
 const validateUser = (user) => {
@@ -67,15 +68,13 @@ const UsersPage = () => {
       />
 
       <Box mt={2}>
-        {filteredUsers.map((user) => (
-          <UserRow
-            key={user.id}
-            user={user}
-            onChange={handleFieldChange}
-            onDelete={handleDelete}
-            errors={errorsMap[user.id] || {}}
-          />
-        ))}
+
+        <VirtualList
+          users={filteredUsers}
+          onFieldChange={handleFieldChange}
+          onDelete={handleDelete}
+          errorsMap={errorsMap}
+        />
       </Box>
     </Box>
   );

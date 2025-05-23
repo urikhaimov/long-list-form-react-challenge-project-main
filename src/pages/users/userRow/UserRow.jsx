@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { TextField, IconButton, MenuItem, Box } from '@mui/material';
+import { TextField, IconButton, Box } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-
+import AutocompleteField from '../../../components/AutocompleteField';
 const UserRow = ({ user, onChange, onDelete, errors }) => {
   const handleChange = (field) => (e) => {
     onChange(user.id, field, e.target.value);
@@ -12,17 +12,14 @@ const UserRow = ({ user, onChange, onDelete, errors }) => {
     <Box
       display="flex"
       flexWrap="wrap"
-      alignItems="flex-start"
-      justifyContent="flex-start"
+      alignItems="center"
+      justifyContent="space-between"
       gap={2}
-      mb={2}
-      sx={{
-        border: errors && Object.keys(errors).length ? '1px solid red' : '1px solid transparent',
-        borderRadius: 1,
-        padding: 2,
-        width: '100%',
-        boxSizing: 'border-box',
-      }}
+      p={2}
+      width="100%"
+      borderRadius={2}
+      bgcolor="#f9f9f9"
+      sx={{ width: '100%', minHeight: 140, boxSizing: 'border-box' }}
     >
       <TextField
         label="Name"
@@ -32,14 +29,16 @@ const UserRow = ({ user, onChange, onDelete, errors }) => {
         helperText={errors?.name}
         fullWidth
       />
-      <TextField
-        label="Country"
-        value={user.country || ''}
-        onChange={handleChange('country')}
-        error={!!errors?.country}
-        helperText={errors?.country}
-        fullWidth
-      />
+      <Box flex={1} minWidth={250}>
+        <AutocompleteField
+          label="Country"
+          value={user.country || ''}
+          onChange={(value) => onChange(user.id, 'country', value)}
+          options={["Israel", "China", "Ukraine", "Canada", "Brazil", "Morocco", "France", "Japan"]}
+          error={!!errors?.country}
+          helperText={errors?.country}
+        />
+      </Box>
       <TextField
         label="Email"
         value={user.email || ''}
@@ -56,7 +55,11 @@ const UserRow = ({ user, onChange, onDelete, errors }) => {
         helperText={errors?.phone}
         fullWidth
       />
-      <IconButton onClick={() => onDelete(user.id)} color="error">
+      <IconButton
+        onClick={() => onDelete(user.id)}
+        color="error"
+        sx={{ alignSelf: 'flex-start' }}
+      >
         <DeleteIcon />
       </IconButton>
     </Box>
