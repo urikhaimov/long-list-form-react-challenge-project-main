@@ -1,63 +1,60 @@
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Typography, Button, Box, TextField } from '@mui/material';
 import { useUsersContext } from '../../context/usersContext';
-import AddButton from '../../components/AddButton';
-import SortableVirtualList from '../../components/SortableVirtualList';
-import { validateUser } from '../../utils/validators';
+import UserRow from '../users/userRow/UserRow';
 
-const countryOptions = ["Israel", "China", "Ukraine", "Canada", "Brazil", "Morocco", "France", "Japan"];
+
+const validateUser = (user) => {
+  const errors = {};
+  if (!user.name?.trim()) errors.name = 'Required';
+  if (!user.email?.includes('@')) errors.email = 'Invalid email';
+  if (!user.phone?.startsWith('+')) errors.phone = 'Must start with +';
+  if (!user.country?.trim()) errors.country = 'Required';
+  return errors;
+};
 
 const UsersPage = () => {
   const { state, dispatch } = useUsersContext();
-  const users = state.users || [];
-
+  const users = state?.users || [];
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredUsers = useMemo(() => {
-    const term = searchTerm.toLowerCase();
     return users.filter((user) =>
       ['name', 'email', 'phone', 'country'].some((field) =>
-        user[field]?.toLowerCase().includes(term)
+        user[field]?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     );
   }, [users, searchTerm]);
 
   const errorsMap = useMemo(() => {
     const map = {};
-    filteredUsers.forEach((user) => {
-      const userErrors = validateUser(user, countryOptions);
-      if (Object.keys(userErrors).length > 0) {
-        map[user.id] = userErrors;
+    filteredUsers.forEach(user => {
+      const errors = validateUser(user);
+      if (Object.keys(errors).length > 0) {
+        map[user.id] = errors;
       }
     });
     return map;
   }, [filteredUsers]);
 
-  const handleFieldChange = useCallback((userId, field, value) => {
-  dispatch({
-    type: 'UPDATE_USER_BY_ID',
-    payload: { id: userId, field, value }
-  });
-}, [dispatch]);
-
-  const handleDelete = useCallback((userId) => {
-    dispatch({ type: 'DELETE_USER_BY_ID', payload: userId });
-  }, [dispatch]);
-
   const handleAdd = () => {
     dispatch({ type: 'ADD_USER' });
   };
 
-  const handleReorder = useCallback((newUsers) => {
-    dispatch({ type: 'SET_USERS', payload: newUsers });
+  const handleFieldChange = useCallback((id, field, value) => {
+    dispatch({ type: 'UPDATE_USER_BY_ID', payload: { id, field, value } });
   }, [dispatch]);
-   if (!users || users.length === 0) return <div>Loading users...</div>;
+
+  const handleDelete = useCallback((id) => {
+    dispatch({ type: 'DELETE_USER_BY_ID', payload: id });
+  }, [dispatch]);
+
   return (
     <Box p={2}>
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <Typography variant="h5">Users ({filteredUsers.length})</Typography>
-        <AddButton handleClick={handleAdd} />
+        <Button variant="contained" onClick={handleAdd}>Add User</Button>
       </Box>
 
       <TextField
@@ -70,23 +67,15 @@ const UsersPage = () => {
       />
 
       <Box mt={2}>
-        <SortableVirtualList
-          users={filteredUsers}
-          onReorder={handleReorder}
-          onFieldChange={handleFieldChange}
-          onDelete={handleDelete}
-          errorsMap={errorsMap}
-          countryOptions={countryOptions}
-        />
-      </Box>
-
-      <Box mt={2}>
-        <Button
-          variant="contained"
-          onClick={() => localStorage.setItem('usersData', JSON.stringify(users))}
-        >
-          Save
-        </Button>
+        {filteredUsers.map((user) => (
+          <UserRow
+            key={user.id}
+            user={user}
+            onChange={handleFieldChange}
+            onDelete={handleDelete}
+            errors={errorsMap[user.id] || {}}
+          />
+        ))}
       </Box>
     </Box>
   );

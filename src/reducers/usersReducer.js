@@ -14,7 +14,16 @@ export const usersReducer = (state, action) => {
     case 'ADD_USER':
       return {
         ...state,
-        users: [action.payload, ...state.users],
+        users: [
+          {
+            id: Date.now().toString(),
+            name: '',
+            email: '',
+            phone: '',
+            country: ''
+          },
+          ...state.users
+        ]
       };
     case 'UPDATE_USER':
       return {
@@ -23,10 +32,10 @@ export const usersReducer = (state, action) => {
           index === action.index ? action.payload : user
         ),
       };
-    case 'DELETE_USER':
+    case 'DELETE_USER_BY_ID':
       return {
         ...state,
-        users: state.users.filter((_, index) => index !== action.index),
+        users: state.users.filter(user => user.id !== action.payload)
       };
     case 'INIT_USERS':
       const localData = JSON.parse(localStorage.getItem('users'));
