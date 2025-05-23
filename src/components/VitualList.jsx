@@ -8,7 +8,7 @@ const ROW_HEIGHT = 400;
 
 const VirtualList = ({
   users,
-  onFieldChange,
+  handleUpdate,
   onDelete,
   errorsMap
 }) => {
@@ -18,13 +18,13 @@ const VirtualList = ({
       <div style={{ ...style, width: '100%' }} key={user.id}>
         <UserRow
           user={user}
-          onChange={onFieldChange}
+          onUpdate={handleUpdate}
           onDelete={onDelete}
           errors={errorsMap[user.id] || {}}
         />
       </div>
     );
-  }, [users, onFieldChange, onDelete, errorsMap]);
+  }, [users, handleUpdate, onDelete, errorsMap]);
 
   return (
     <Box height={600} width="100%">
